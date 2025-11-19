@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Entry/Exit Tracker</title>
+
+  <!-- XLSX Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background-color: #000; /* Black background */
+      color: #fff; /* Light text for contrast */
+    }
+
+    .blue-screen {
+      background-color: #007BFF;
+      color: white;
+      padding: 30px;
+      border-radius: 8px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .button-group button {
+      flex: 1 1 30%;
+      padding: 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: white;
+      color: #007BFF;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-group button:hover {
+      background-color: #e0e0e0;
+    }
+
+    input {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 4px;
+      border: none;
+      outline: none;
+      background-color: #fff; /* keep inputs readable on black background */
+      color: #000; /* input text in black for contrast */
+    }
+
+    #timeOutput {
+      font-weight: bold;
+      margin: 10px 0;
+      color: #fff;
+    }
+
+    .export-button {
+      margin-top: 30px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1 -->
+  <div id="screen1" class="blue-screen">
+    <h2>Select Category</h2>
+    <div class="button-group">
+      <button onclick="selectCategory('Student')">1. Student</button>
+      <button onclick="selectCategory('Staff')">2. Staff</button>
+      <button onclick="selectCategory('Management')">3. Management</button>
+    </div>
+  </div>
+
+  <!-- Screen 1.5 -->
+  <div id="screen1-5" class="blue-screen" style="display: none;">
+    <h2>Select Staff Type</h2>
+    <div class="button-group">
+      <button onclick="selectStaffType('Teaching')">Teaching Staff</button>
+      <button onclick="selectStaffType('Non-Teaching')">Non-Teaching Staff</button>
+      <button onclick="goBackToScreen1()">Back</button>
+    </div>
+  </div>
+
+  <!-- Screen 2 -->
+  <div id="screen2" class="blue-screen" style="display: none;">
+    <h2 id="screen2-title">Select Movement</h2>
+    <div class="button-group">
+      <button onclick="selectMovement('Coming')">Coming</button>
+      <button onclick="selectMovement('Going')">Going</button>
+      <button onclick="goBackToStaffOrMain()">Back</button>
+    </div>
+  </div>
+
+  <!-- Screen 3 -->
+  <div id="screen3" class="blue-screen" style="display: none;">
+    <h2 id="screen3-title">Movement Log</h2>
+    <input type="text" id="nameInput" placeholder="Enter Name" oninput="onNameChanged()" />
+    <input type="text" id="classInput" placeholder="Enter Department" />
+    <div id="timeOutput"></div>
+    <div class="button-group">
+      <button id="logEntryBtn" onclick="logEntry()" disabled>Log Entry</button>
+      <button onclick="goBackToScreen2()">Back</button>
+    </div>
+  </div>
+
+  <!-- Export Section -->
+  <div class="export-button" id="exportBtnContainer" style="display: none;">
+    <button onclick="exportToExcel()">Export to Excel</button>
+    <button onclick="viewLogs()">View Logs</button>
+  </div>
+
+  <style>
+    /* Dark blue page background and white text */
+    body {
+      background-color: #04264b !important; /* dark blue */
+      color: #ffffff !important;
+    }
+
+    /* Buttons: medium blue with white text */
+    .button-group button {
+      background-color: #0b66d1 !important; /* medium blue */
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border: none !important;
+    }
+
+    .button-group button:hover {
+      background-color: #0e7ff3 !important;
+    }
+
+    /* Export container */
+    #exportBtnContainer {
+      display: none; /* controlled by JS */
+      margin-top: 20px;
+      max-width: 420px;
+    }
+
+    #exportBtnContainer button {
+      background-color: #0b66d1 !important;
+      color: #ffffff !important;
+      border: none;
+      padding: 12px 16px;
+      margin-right: 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      background-color: #2f2f2f !important;
+      color: #fff !important;
+      cursor: pointer;
+    }
+
+    #exportBtnContainer button:hover {
+      background-color: #0e7ff3 !important;
+    }
+
+    /* Ensure inputs remain readable */
+    input {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+    }
+
+    /* Slightly darker panels to fit the dark blue theme */
+    .blue-screen {
+      background-color: rgba(0, 30, 60, 0.9);
+      color: #ffffff;
+    }
+  </style>
+  <style>
+    /* Make the page background green and keep text readable */
+    body {
+      background-color: #3c3c3c !important;
+      color: #fff !important;
+    }
+
+    /* Ensure form inputs remain readable on the green background */
+    input {
+      background-color: #fff !important;
+      color: #000 !important;
+    }
+
+    /* If you also want the blue panels to be green, replace or uncomment:
+    .blue-screen { background-color: #2e8b57 !important; }
+    */
+  </style>
+  <!-- Logs Screen -->
+  <div id="screenLogs" class="blue-screen" style="display: none;">
+    <h2>Movement Logs</h2>
+
+    <div id="logsTableContainer"
+      style="max-height: 400px; overflow-y: auto; background: white; color: black; padding: 10px; border-radius: 8px;">
+    </div>
+
+    <div class="button-group" style="margin-top: 20px;"></div>
+      <button id="printBtn" onclick="printLogs()" style="display:none;">Print</button>
+      <button onclick="goBackFromLogs()">Back</button>
+    </div>
+  </div>
+<script>
+/* -------------- START OF JS CODE -------------- */
+
+// Keys for Local Storage
+const DATA_KEY = 'movementTrackerData';
+const DATE_KEY = 'movementTrackerDate';
+
+let dataEntries = [];
+const nameToClassMap = {};
+let autoID = 1;
+let currentExportDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+window.currentCategory = '';
+window.currentStaffType = '';
+window.currentMovement = '';
+
+// ✨ NEW: Function to save the current data array to Local Storage
+function saveData() {
+    localStorage.setItem(DATA_KEY, JSON.stringify(dataEntries));
+}
+
+// ✨ NEW: Function to clear local storage after export/on demand
+function clearLogs(startNewDay = false) {
+    // We only clear if the user confirms, or if it's an automatic new day start
+    if (startNewDay || confirm("Are you sure you want to clear all logs? This action is irreversible unless you have exported the data.")) {
+        dataEntries = [];
+        // Note: nameToClassMap remains to keep person data persistent
+        
+        // Reset autoID and remove the data from storage
+        autoID = 1;
+        localStorage.removeItem(DATA_KEY);
+        
+        if (startNewDay) {
+            const today = new Date().toISOString().split('T')[0];
+            localStorage.setItem(DATE_KEY, today);
+            currentExportDate = today;
+            // Reload the page to reset the UI and run initializeTracker() fresh
+            location.reload(); 
+        } else {
+            alert('Logs cleared successfully.');
+        }
+    }
+}
+
+// ✨ NEW: Function to initialize the application and handle daily file rotation
+function initializeTracker() {
+    const savedData = localStorage.getItem(DATA_KEY);
+    const savedDate = localStorage.getItem(DATE_KEY);
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Check if the date has changed
+    if (savedData && savedDate && savedDate !== today) {
+        // Data exists from a previous day. Load old data for export.
+        const parsedData = JSON.parse(savedData);
+        dataEntries = parsedData;
+        currentExportDate = savedDate;
+        
+        // Alert user and make export button visible
+        alert(`A new day has begun! Please export the logs from ${savedDate} before logging new entries.`);
+        document.getElementById('exportBtnContainer').style.display = 'block';
+
+    } else if (savedData && savedDate === today) {
+        // Continue logging for the same day
+        const parsedData = JSON.parse(savedData);
+        dataEntries = parsedData;
+        
+        // Set the next autoID based on the largest ID in the loaded data
+        const maxId = dataEntries.reduce((max, entry) => Math.max(max, entry.ID || 0), 0);
+        autoID = maxId + 1;
+        
+        console.log(`Continuing log for ${today}. ${dataEntries.length} entries loaded.`);
+        currentExportDate = today;
+    } else {
+        // Start a completely new log (new day or first launch)
+        localStorage.setItem(DATE_KEY, today);
+        currentExportDate = today;
+    }
+}
+
+// Call the initialization function when the script loads
+initializeTracker();
+
+
+function selectCategory(category) {
+  window.currentCategory = category;
+  const exportContainer = document.getElementById('exportBtnContainer');
+
+  if (category === 'Staff' || category === 'Management') {
+    exportContainer.style.display = 'block';
+  } else {
+    exportContainer.style.display = 'none';
+  }
+
+  if (category === 'Staff') {
+    document.getElementById('screen1').style.display = 'none';
+    document.getElementById('screen1-5').style.display = 'block';
+  } else {
+    document.getElementById('screen1').style.display = 'none';
+    document.getElementById('screen2').style.display = 'block';
+  }
+}
+
+function selectStaffType(type) {
+  window.currentStaffType = type;
+  document.getElementById('screen1-5').style.display = 'none';
+  document.getElementById('screen2').style.display = 'block';
+}
+
+function selectMovement(movement) {
+  window.currentMovement = movement;
+  document.getElementById('screen2').style.display = 'none';
+  document.getElementById('screen3').style.display = 'block';
+
+  document.getElementById('screen3-title').textContent = `${movement} Log`;
+  updateCurrentTime();
+
+  const classInput = document.getElementById('classInput');
+  if (window.currentCategory === 'Student') {
+    classInput.placeholder = 'Enter Class';
+  } else if (window.currentCategory === 'Staff') {
+    classInput.placeholder =
+      window.currentStaffType === 'Teaching' ? 'Enter Class' : 'Enter Department';
+  } else if (window.currentCategory === 'Management') {
+    classInput.placeholder = 'Enter Position';
+  }
+
+  document.getElementById('nameInput').value = '';
+  classInput.value = '';
+  classInput.disabled = false;
+  document.getElementById('logEntryBtn').disabled = true;
+}
+
+function goBackToScreen1() {
+  document.getElementById('screen1-5').style.display = 'none';
+  document.getElementById('screen1').style.display = 'block';
+}
+
+function goBackToStaffOrMain() {
+  document.getElementById('screen2').style.display = 'none';
+  if (window.currentCategory === 'Staff') {
+    document.getElementById('screen1-5').style.display = 'block';
+  } else {
+    document.getElementById('screen1').style.display = 'block';
+  }
+}
+
+function goBackToScreen2() {
+  document.getElementById('screen3').style.display = 'none';
+  document.getElementById('screen2').style.display = 'block';
+}
+
+function logEntry() {
+  const name = document.getElementById('nameInput').value.trim();
+  const classVal = document.getElementById('classInput').value.trim();
+  const time = document.getElementById('timeOutput').textContent.trim();
+    
+    // ✨ NEW CHECK: Prevent logging if a previous day's data hasn't been exported
+    const today = new Date().toISOString().split('T')[0];
+    if (currentExportDate !== today) {
+        return alert('Cannot log new entry. Please export the previous day\'s logs first.');
+    }
+
+  if (!name) return alert('Please enter a name before logging.');
+
+  const key = name.toLowerCase();
+  let finalClassVal = classVal || nameToClassMap[key];
+
+  if (!finalClassVal && !nameToClassMap[key]) {
+    return alert('Please enter class, department, or position for this new name.');
+  }
+
+  if (!nameToClassMap[key] && finalClassVal) {
+    nameToClassMap[key] = finalClassVal;
+  }
+
+  const category = window.currentCategory || 'Student';
+  const staffType = window.currentStaffType || '';
+  const movement = window.currentMovement || 'Entered';
+
+  let categoryField = 'Department';
+  if (category === 'Student' || (category === 'Staff' && staffType === 'Teaching')) {
+    categoryField = 'Class';
+  } else if (category === 'Management') {
+    categoryField = 'Position';
+  }
+
+  dataEntries.push({
+    ID: autoID++, // AUTO-ID HERE
+    Name: name,
+    [categoryField]: nameToClassMap[key] || finalClassVal || '',
+    Category: category,
+    StaffType: staffType,
+    Movement: movement,
+    Time: time || new Date().toLocaleString()
+  });
+    
+    // ✨ NEW: Save the updated data to Local Storage
+    saveData();
+
+  document.getElementById('nameInput').value = '';
+  document.getElementById('classInput').value = '';
+  document.getElementById('classInput').disabled = false;
+  document.getElementById('timeOutput').textContent = '';
+  document.getElementById('logEntryBtn').disabled = true;
+
+  alert('Entry logged successfully.');
+}
+
+function viewLogs() {
+  const logsContainer = document.getElementById('logsTableContainer');
+  document.getElementById('screen2').style.display = 'none';
+  document.getElementById('screenLogs').style.display = 'block';
+
+  if (dataEntries.length === 0) {
+    logsContainer.innerHTML = '<p>No entries logged yet.</p>';
+    return;
+  }
+
+  let html =
+    '<table border="1" width="100%" style="border-collapse: collapse; text-align: left;">';
+  html +=
+    '<tr><th>ID</th><th>Name</th><th>Category</th><th>Staff Type</th><th>Class/Dept/Pos</th><th>Movement</th><th>Time</th></tr>';
+
+  for (const e of dataEntries) {
+    const info = e.Class || e.Department || e.Position || '';
+    html += `<tr>
+      <td>${e.ID}</td>
+      <td>${e.Name}</td>
+      <td>${e.Category}</td>
+      <td>${e.StaffType || '-'}</td>
+      <td>${info}</td>
+      <td>${e.Movement}</td>
+      <td>${e.Time}</td>
+    </tr>`;
+  }
+
+  html += '</table>';
+  logsContainer.innerHTML = html;
+}
+
+function goBackFromLogs() {
+  document.getElementById('screenLogs').style.display = 'none';
+  document.getElementById('screen2').style.display = 'block';
+}
+
+function onNameChanged() {
+  const name = document.getElementById('nameInput').value.trim().toLowerCase();
+  const classInput = document.getElementById('classInput');
+  const timeOutput = document.getElementById('timeOutput');
+  const logButton = document.getElementById('logEntryBtn');
+
+  if (name && nameToClassMap[name]) {
+    classInput.value = nameToClassMap[name];
+    classInput.disabled = true;
+    updateCurrentTime();
+    logButton.disabled = false;
+  } else if (name) {
+    classInput.disabled = false;
+    updateCurrentTime();
+    logButton.disabled = false;
+  } else {
+    classInput.value = '';
+    classInput.disabled = false;
+    timeOutput.textContent = '';
+    logButton.disabled = true;
+  }
+}
+
+function updateCurrentTime() {
+  document.getElementById('timeOutput').textContent = new Date().toLocaleString();
+}
+
+function exportToExcel() {
+  if (dataEntries.length === 0) {
+        // Handle case where old data was loaded but cleared manually
+        if (localStorage.getItem(DATA_KEY)) {
+            clearLogs(true);
+            return;
+        }
+        return alert('No data to export.');
+    }
+
+  const studentEntries = dataEntries.filter(e => e.Category === 'Student');
+  const staffEntries = dataEntries.filter(e => e.Category === 'Staff');
+  const managementEntries = dataEntries.filter(e => e.Category === 'Management');
+
+  const workbook = XLSX.utils.book_new();
+
+  if (studentEntries.length)
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(studentEntries), 'Students');
+  if (staffEntries.length)
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(staffEntries), 'Staff');
+  if (managementEntries.length)
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(managementEntries), 'Management');
+
+  // ✨ MODIFIED: Use the stored date (currentExportDate) for the filename
+  const filename = `Movement_Logs_${currentExportDate}.xlsx`;
+  XLSX.writeFile(workbook, filename);
+  alert(`Excel file saved: ${filename}`);
+    
+    // ✨ NEW: If the exported data is from a previous day, clear the logs and start fresh
+    const today = new Date().toISOString().split('T')[0];
+    if (currentExportDate !== today) {
+        clearLogs(true);
+    }
+}
+
+/* -------------- END OF JS CODE -------------- */
+</script>
+
+  
+
+</body>
+</html>
