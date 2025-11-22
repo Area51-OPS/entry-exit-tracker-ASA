@@ -130,6 +130,7 @@
 	table th, table td {
 	  padding: 6px;
 	  border: 1px solid #ddd;
+	  color: var(--input-text); /* Ensure table text is readable */
 	}
   </style>
 </head>
@@ -286,6 +287,7 @@ function selectCategory(category) {
   } else {
 	document.getElementById('screen1').style.display = 'none';
 	document.getElementById('screen2').style.display = 'block'; // Go to Movement selection
+  	// The export container logic is handled below in selectStaffType and goBackToStaffOrMain
   }
 }
 
@@ -294,9 +296,10 @@ function selectStaffType(type) {
   document.getElementById('screen1-5').style.display = 'none';
   document.getElementById('screen2').style.display = 'block';
 
-  // Ensure the export buttons show up after selecting Staff Type (they should be visible now)
+  // Ensure the export buttons show up on screen 2 if we came from screen 1-5
   const exportContainer = document.getElementById('exportBtnContainer');
-  if (dataEntries.length > 0) {
+  const today = new Date().toISOString().split('T')[0];
+  if (dataEntries.length > 0 || currentExportDate !== today) {
 	exportContainer.style.display = 'block';
   }
 }
@@ -393,6 +396,9 @@ function logEntry() {
 
   dataEntries.push(entry);
   saveData();
+  
+  // After logging an entry, ensure the export button is visible
+  document.getElementById('exportBtnContainer').style.display = 'block';
 
   document.getElementById('nameInput').value = '';
   document.getElementById('classInput').value = '';
@@ -449,10 +455,11 @@ function viewLogs() {
 function goBackFromLogs() {
   document.getElementById('screenLogs').style.display = 'none';
   
-  // Determine which main selection screen to return to based on the current category
+  // Go back to the screen the user was last on, which is either screen 1-5 or screen 2
   if (window.currentCategory === 'Staff') {
 	document.getElementById('screen1-5').style.display = 'block';
   } else {
+	// If it's student or management, return to the movement screen (screen 2)
 	document.getElementById('screen2').style.display = 'block';
   }
 }
