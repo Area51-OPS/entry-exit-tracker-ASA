@@ -8,142 +8,142 @@
 
   <style>
 	/* Consolidated styles to avoid duplicates and stray braces */
-	:root {
-	  --bg-dark: #3c3c3c;
-	  --panel: rgba(0, 30, 60, 0.9);
-	  --accent: #0b66d1;
-	  --accent-hover: #0e7ff3;
-	  --button-dark: #2f2f2f;
-	  --text-on-dark: #ffffff;
-	  --input-bg: #ffffff;
-	  --input-text: #000000;
-	}
+:root {
+  --bg-dark: #3c3c3c;
+  --panel: rgba(0, 30, 60, 0.9);
+  --accent: #0b66d1;
+  --accent-hover: #0e7ff3;
+  --button-dark: #2f2f2f;
+  --text-on-dark: #ffffff;
+  --input-bg: #ffffff;
+  --input-text: #000000;
+}
 
-	html, body {
-	  height: 100%;
-	  margin: 0;
-	}
+html, body {
+  height: 100%;
+  margin: 0;
+}
 
-	body {
-	  font-family: Arial, sans-serif;
-	  padding: 20px;
-	  background-color: var(--bg-dark);
-	  color: var(--text-on-dark);
-	}
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: var(--bg-dark);
+  color: var(--text-on-dark);
+}
 
-	.blue-screen {
-	  background-color: var(--panel);
-	  color: var(--text-on-dark);
-	  padding: 30px;
-	  border-radius: 8px;
-	  margin-bottom: 16px;
-	}
+.blue-screen {
+  background-color: var(--panel);
+  color: var(--text-on-dark);
+  padding: 30px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
 
-	.button-group {
-	  display: flex;
-	  gap: 10px;
-	  flex-wrap: wrap;
-	  margin-top: 20px;
-	}
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
 
-	.button-group button {
-	  flex: 1 1 30%;
-	  padding: 12px;
-	  font-size: 16px;
-	  border: none;
-	  border-radius: 6px;
-	  background-color: var(--accent);
-	  color: var(--text-on-dark);
-	  font-weight: 700;
-	  cursor: pointer;
-	  transition: background-color 0.2s ease;
-	}
+.button-group button {
+  flex: 1 1 30%;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--accent);
+  color: var(--text-on-dark);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-	.button-group button:hover {
-	  background-color: var(--accent-hover);
-	}
+.button-group button:hover {
+  background-color: var(--accent-hover);
+}
 
-	.button-group button.secondary {
-	  background-color: var(--button-dark);
-	}
+.button-group button.secondary {
+  background-color: var(--button-dark);
+}
 
-	input[type="text"] {
-	  display: block;
-	  margin: 10px 0;
-	  padding: 10px;
-	  font-size: 16px;
-	  width: 100%;
-	  max-width: 400px;
-	  border-radius: 4px;
-	  border: 1px solid #ccc;
-	  background-color: var(--input-bg);
-	  color: var(--input-text);
-	  box-sizing: border-box;
-	}
+input[type="text"] {
+  display: block;
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  box-sizing: border-box;
+}
 
-	#timeOutput {
-	  font-weight: bold;
-	  margin: 10px 0;
-	  color: var(--text-on-dark);
-	}
+#timeOutput {
+  font-weight: bold;
+  margin: 10px 0;
+  color: var(--text-on-dark);
+}
 
-	/* Styling for the Export/View Logs container */
-	#exportBtnContainer {
-	  display: none; /* Hide by default */
-	  margin-top: 20px;
-	  padding-top: 10px;
-	  border-top: 1px solid rgba(255, 255, 255, 0.2);
-	  max-width: 420px;
-	}
+/* Styling for the Export/View Logs container */
+#exportBtnContainer {
+  display: none; /* Hide by default */
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 420px;
+}
 
-	#exportBtnContainer button {
-	  background-color: var(--button-dark);
-	  color: #fff;
-	  border: none;
-	  padding: 10px 14px;
-	  margin-right: 8px;
-	  border-radius: 6px;
-	  font-weight: 700;
-	  cursor: pointer;
-	}
+#exportBtnContainer button {
+  background-color: var(--button-dark);
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  margin-right: 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
 
-	#exportBtnContainer button:hover {
-	  background-color: var(--accent-hover);
-	}
+#exportBtnContainer button:hover {
+  background-color: var(--accent-hover);
+}
 
-	/* Logs container style */
-	#logsTableContainer {
-	  max-height: 400px;
-	  overflow-y: auto;
-	  background: #fff;
-	  color: #000;
-	  padding: 10px;
-	  border-radius: 8px;
-	}
+/* Logs container style */
+#logsTableContainer {
+  max-height: 400px;
+  overflow-y: auto;
+  background: #fff;
+  color: #000;
+  padding: 10px;
+  border-radius: 8px;
+}
 
-	table {
-	  width: 100%;
-	  border-collapse: collapse;
-	  text-align: left;
-	}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
 
-	table th, table td {
-	  padding: 6px;
-	  border: 1px solid #ddd;
-	  color: var(--input-text); /* Ensure table text is readable */
-	}
-  </style>
+table th, table td {
+  padding: 6px;
+  border: 1px solid #ddd;
+  color: var(--input-text); /* Ensure table text is readable */
+}
+</style>
 </head>
 <body>
 
-  <div id="screen1" class="blue-screen">
-	<h2>Select Category</h2>
-	<div class="button-group">
-	  <button onclick="selectCategory('Student')">1. Student</button>
-	  <button onclick="selectCategory('Staff')">2. Staff</button>
-	  <button onclick="selectCategory('Management')">3. Management</button>
-	</div>
-  </div>
+<div id="screen1" class="blue-screen">
+  <h2>Select Category</h2>
+  <div class="button-group">
+	<button onclick="selectCategory('Student')">1. Student</button>
+	<button onclick="selectCategory('Staff')">2. Staff</button>
+	<button onclick="selectCategory('Management')">3. Management</button>
+  </div>
+</div>
 
   <div id="screen1-5" class="blue-screen" style="display: none;">
 	<h2>Select Staff Type</h2>
@@ -152,10 +152,12 @@
 	  <button onclick="selectStaffType('Non-Teaching')">Non-Teaching Staff</button>
 	  <button onclick="goBackToScreen1()">Back</button>
 	</div>
-	<div id="exportBtnContainer">
+  </div>
+
+  <!-- Export/View Logs buttons moved outside the staff selection panel so they can be shown on other screens as needed -->
+  <div id="exportBtnContainer" style="display: none;">
 	  <button onclick="exportToExcel()">Export to Excel</button>
 	  <button onclick="viewLogs()">View Logs</button>
-	</div>
   </div>
 
   <div id="screen2" class="blue-screen" style="display: none;">
