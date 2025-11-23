@@ -16,7 +16,7 @@ Open the tracker in your browser.
 
 Select Category → Movement.
 
-Enter Name + Class/Department.
+Enter Name + Class/Department/Position.
 
 Press Log Entry.
 
@@ -27,4 +27,4 @@ Previous day logs must be exported before new day entries.
 Deployment
 
 This application is 100% client-side and runs entirely in the browser.
-You can deploy it free using GitHub Pages.
+
