@@ -1,295 +1,444 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Entry/Exit Tracker</title>
+<meta charset="UTF-8" />
+<title>Entry/Exit Tracker</title>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-  <style>
-	/* Consolidated styles to avoid duplicates and stray braces */
-:root {
-  --bg-dark: #3c3c3c;
-  --panel: rgba(0, 30, 60, 0.9);
-  --accent: #0b66d1;
-  --accent-hover: #0e7ff3;
-  --button-dark: #2f2f2f;
-  --text-on-dark: #ffffff;
-  --input-bg: #ffffff;
-  --input-text: #000000;
-}
+<style>
+  /* Consolidated styles to avoid duplicates and stray braces */
+  :root {
+	--bg-dark: #3c3c3c;
+	--panel: rgba(0, 30, 60, 0.9);
+	--accent: #0b66d1;
+	--accent-hover: #0e7ff3;
+	--button-dark: #2f2f2f;
+	--text-on-dark: #ffffff;
+	--input-bg: #ffffff;
+	--input-text: #000000;
+  }
 
-html, body {
-  height: 100%;
-  margin: 0;
-}
+  html, body {
+	height: 100%;
+	margin: 0;
+  }
 
-body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: var(--bg-dark);
-  color: var(--text-on-dark);
-}
+  body {
+	font-family: Arial, sans-serif;
+	padding: 20px;
+	background-color: var(--bg-dark);
+	color: var(--text-on-dark);
+  }
 
-.blue-screen {
-  background-color: var(--panel);
-  color: var(--text-on-dark);
-  padding: 30px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
+  .blue-screen {
+	background-color: var(--panel);
+	color: var(--text-on-dark);
+	padding: 30px;
+	border-radius: 8px;
+	margin-bottom: 16px;
+  }
 
-.button-group {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
+  .button-group {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 20px;
+  }
 
-.button-group button {
-  flex: 1 1 30%;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  background-color: var(--accent);
-  color: var(--text-on-dark);
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
+  .button-group button {
+	flex: 1 1 30%;
+	padding: 12px;
+	font-size: 16px;
+	border: none;
+	border-radius: 6px;
+	background-color: var(--accent);
+	color: var(--text-on-dark);
+	font-weight: 700;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+  }
 
-.button-group button:hover {
-  background-color: var(--accent-hover);
-}
+  .button-group button.logs-btn {
+	flex: 1 1 100%;
+	margin-top: 10px;
+	background-color: var(--button-dark);
+  }
 
-.button-group button.secondary {
-  background-color: var(--button-dark);
-}
+  .button-group button:hover {
+	background-color: var(--accent-hover);
+  }
 
-input[type="text"] {
-  display: block;
-  margin: 10px 0;
-  padding: 10px;
-  font-size: 16px;
-  width: 100%;
-  max-width: 400px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: var(--input-bg);
-  color: var(--input-text);
-  box-sizing: border-box;
-}
+  .button-group button.secondary {
+	background-color: var(--button-dark);
+  }
 
-#timeOutput {
-  font-weight: bold;
-  margin: 10px 0;
-  color: var(--text-on-dark);
-}
+  input[type="text"], input[type="password"] {
+	display: block;
+	margin: 10px 0;
+	padding: 10px;
+	font-size: 16px;
+	width: 100%;
+	max-width: 400px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	box-sizing: border-box;
+  }
 
-/* Styling for the Export/View Logs container */
-#exportBtnContainer {
-  display: none; /* Hide by default */
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  max-width: 420px;
-}
+  #timeOutput {
+	font-weight: bold;
+	margin: 10px 0;
+	color: var(--text-on-dark);
+  }
 
-#exportBtnContainer button {
-  background-color: var(--button-dark);
-  color: #fff;
-  border: none;
-  padding: 10px 14px;
-  margin-right: 8px;
-  border-radius: 6px;
-  font-weight: 700;
-  cursor: pointer;
-}
+  /* New style for the password input section */
+  .password-control {
+	margin-top: 20px;
+	padding-top: 10px;
+	border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
 
-#exportBtnContainer button:hover {
-  background-color: var(--accent-hover);
-}
+  .password-control button {
+	background-color: var(--button-dark);
+	flex: 1 1 100%;
+  }
 
-/* Logs container style */
-#logsTableContainer {
-  max-height: 400px;
-  overflow-y: auto;
-  background: #fff;
-  color: #000;
-  padding: 10px;
-  border-radius: 8px;
-}
+  .logs-control-buttons {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 15px;
+  }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
+  .logs-control-buttons button {
+	flex: 1;
+	padding: 12px;
+  }
 
-table th, table td {
-  padding: 6px;
-  border: 1px solid #ddd;
-  color: var(--input-text); /* Ensure table text is readable */
-}
+  /* Logs container style */
+  #logsTableContainer {
+	max-height: 400px;
+	overflow-y: auto;
+	background: #fff;
+	color: #000;
+	padding: 10px;
+	border-radius: 8px;
+  }
+
+  table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+  }
+
+  table th, table td {
+	padding: 6px;
+	border: 1px solid #ddd;
+	color: var(--input-text); /* Ensure table text is readable */
+  }
 </style>
 </head>
 <body>
 
 <div id="screen1" class="blue-screen">
-  <h2>Select Category</h2>
-  <div class="button-group">
-	<button onclick="selectCategory('Student')">1. Student</button>
-	<button onclick="selectCategory('Staff')">2. Staff</button>
-	<button onclick="selectCategory('Management')">3. Management</button>
-  </div>
+  <h2>Select Category</h2>
+  <div class="button-group">
+    <button onclick="selectCategory('Student')">1. Student</button>
+    <button onclick="selectCategory('Staff')">2. Staff</button>
+    <button onclick="selectCategory('Management')">3. Management</button>
+  </div>
 </div>
 
-  <div id="screen1-5" class="blue-screen" style="display: none;">
-	<h2>Select Staff Type</h2>
-	<div class="button-group">
-	  <button onclick="selectStaffType('Teaching')">Teaching Staff</button>
-	  <button onclick="selectStaffType('Non-Teaching')">Non-Teaching Staff</button>
-	  <button onclick="goBackToScreen1()">Back</button>
-	</div>
+<div id="screen1-5" class="blue-screen" style="display: none;">
+  <h2>Select Staff Type   </h2>
+  <div class="button-group">
+    <button onclick="selectStaffType('Teaching')">Teaching Staff</button>
+    <button onclick="selectStaffType('Non-Teaching')">Non-Teaching Staff</button>
+    <button onclick="goBackToScreen1()">Back</button>
+  </div>
+</div>
+
+<div id="screen2" class="blue-screen" style="display: none;">
+  <h2 id="screen2-title">Select Movement</h2>
+  <div class="button-group">
+    <button onclick="selectMovement('Coming')">Coming</button>
+    <button onclick="selectMovement('Going')">Going</button>
+    <button onclick="goBackToStaffOrMain()">Back</button>
+  </div>
+        <button id="logsControlBtn" onclick="showLogsControlScreen()" class="logs-btn" style="display: none;">View/Export Logs</button>
+</div>
+
+<div id="screen3" class="blue-screen" style="display: none;">
+  <h2 id="screen3-title">Movement Log</h2>
+  <input type="text" id="nameInput" placeholder="Enter Name" oninput="onNameChanged()" />
+  <input type="text" id="classInput" placeholder="Enter Department" />
+  <div id="timeOutput"></div>
+  <div class="button-group">
+    <button id="logEntryBtn" onclick="logEntry()" disabled>Log Entry</button>
+    <button onclick="goBackToScreen2()">Back</button>
+  </div>
+</div>
+
+<div id="screenLogsControl" class="blue-screen" style="display: none;">
+  <h2>Log Access Controls</h2>
+
+    <div class="logs-control-buttons">
+    <button id="exportBtn" onclick="exportToExcel()" disabled>Export to Excel</button>
+    <button id="viewLogsBtn" onclick="viewLogs()" disabled>View Logs Table</button>
   </div>
 
-  <!-- Export/View Logs buttons moved outside the staff selection panel so they can be shown on other screens as needed -->
-  <div id="exportBtnContainer" style="display: none;">
-	  <button onclick="exportToExcel()">Export to Excel</button>
-	  <button onclick="viewLogs()">View Logs</button>
+    <div class="password-control">
+    <h4>🔒 Access Password</h4>
+    <input type="password" id="logPasswordInput" placeholder="Enter Password to Access Logs" />
+    <div class="button-group">
+      <button onclick="checkAndGrantLogAccess()">Access Logs</button>
+      <button onclick="changePasswordFlow()" class="secondary" id="setChangePasswordBtn">Set/Change Password</button>
+    </div>
   </div>
-
-  <div id="screen2" class="blue-screen" style="display: none;">
-	<h2 id="screen2-title">Select Movement</h2>
-	<div class="button-group">
-	  <button onclick="selectMovement('Coming')">Coming</button>
-	  <button onclick="selectMovement('Going')">Going</button>
-	  <button onclick="goBackToStaffOrMain()">Back</button>
-	</div>
+  <div class="button-group">
+    <button onclick="goBackToScreen2()">Back</button>
   </div>
+</div>
 
-  <div id="screen3" class="blue-screen" style="display: none;">
-	<h2 id="screen3-title">Movement Log</h2>
-	<input type="text" id="nameInput" placeholder="Enter Name" oninput="onNameChanged()" />
-	<input type="text" id="classInput" placeholder="Enter Department" />
-	<div id="timeOutput"></div>
-	<div class="button-group">
-	  <button id="logEntryBtn" onclick="logEntry()" disabled>Log Entry</button>
-	  <button onclick="goBackToScreen2()">Back</button>
-	</div>
+
+<div id="screenLogs" class="blue-screen" style="display: none;">
+  <h2>Movement Logs</h2>
+  <div id="logsTableContainer"></div>
+
+  <div class="button-group" style="margin-top: 20px;">
+    <button id="printBtn" onclick="printLogs()" style="display:none;">Print</button>
+    <button onclick="goBackFromLogs()">Back</button>
   </div>
-
-    <div id="screenLogs" class="blue-screen" style="display: none;">
-	<h2>Movement Logs</h2>
-	<div id="logsTableContainer"></div>
-
-	<div class="button-group" style="margin-top: 20px;">
-	  <button id="printBtn" onclick="printLogs()" style="display:none;">Print</button>
-	  <button onclick="goBackFromLogs()">Back</button>
-	</div>
-  </div>
+</div>
 
 <script>
 /* -------------- START OF JS CODE -------------- */
 const DATA_KEY = 'movementTrackerData';
 const DATE_KEY = 'movementTrackerDate';
+const PASSWORD_KEY = 'logAccessPassword'; // Key for stored password
 
 let dataEntries = [];
 const nameToClassMap = {};
 let autoID = 1;
 let currentExportDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+let logAccessGranted = false; // Tracks successful password entry in the current session
 
 window.currentCategory = '';
 window.currentStaffType = '';
 window.currentMovement = '';
 
+// Helper to enable/disable the access buttons
+function toggleAccessButtons(enable) {
+    const exportBtn = document.getElementById('exportBtn');
+    const viewBtn = document.getElementById('viewLogsBtn');
+    if (exportBtn) exportBtn.disabled = !enable;
+    if (viewBtn) viewBtn.disabled = !enable;
+}
+
 function getFormattedDateTime() {
   const now = new Date();
   const options = {
-	year: 'numeric',
-	month: '2-digit',
-	day: '2-digit',
-	hour: '2-digit',
-	minute: '2-digit',
-	second: '2-digit',
-	hour12: true,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
   };
   return now.toLocaleString('en-US', options);
 }
 
 function saveData() {
   try {
-	localStorage.setItem(DATA_KEY, JSON.stringify(dataEntries));
+    localStorage.setItem(DATA_KEY, JSON.stringify(dataEntries));
   } catch (e) {
-	console.error('Failed to save data to localStorage', e);
+    console.error('Failed to save data to localStorage', e);
   }
 }
 
 function clearLogs(startNewDay = false) {
   if (startNewDay || confirm("Are you sure you want to clear all logs? This action is irreversible unless you have exported the data.")) {
-	dataEntries = [];
-	autoID = 1;
-	localStorage.removeItem(DATA_KEY);
+    dataEntries = [];
+    autoID = 1;
+    localStorage.removeItem(DATA_KEY);
 
-	if (startNewDay) {
-	  const today = new Date().toISOString().split('T')[0];
-	  localStorage.setItem(DATE_KEY, today);
-	  currentExportDate = today;
-	  location.reload();
-	} else {
-	  alert('Logs cleared successfully.');
-	}
+    if (startNewDay) {
+const today = new Date().toISOString().split('T')[0];
+// Ensure all buttons use the same blue accent (override any inline/other styles)
+const root = document.documentElement;
+root.style.setProperty('--accent', '#0b66d1');
+root.style.setProperty('--accent-hover', '#0e7ff3');
+root.style.setProperty('--button-dark', '#0b66d1');
+
+const accentColor = getComputedStyle(root).getPropertyValue('--accent').trim();
+const textOnDark = getComputedStyle(root).getPropertyValue('--text-on-dark').trim() || '#ffffff';
+
+document.querySelectorAll('button').forEach(btn => {
+	btn.style.backgroundColor = accentColor;
+	btn.style.color = textOnDark;
+	btn.style.border = 'none';
+	btn.style.fontWeight = '700';
+	btn.style.cursor = 'pointer';
+});
+      localStorage.setItem(DATE_KEY, today);
+      currentExportDate = today;
+      location.reload();
+    } else {
+      alert('Logs cleared successfully.');
+    }
   }
 }
 
 function initializeTracker() {
-  const savedData = localStorage.getItem(DATA_KEY);
-  const savedDate = localStorage.getItem(DATE_KEY);
-  const today = new Date().toISOString().split('T')[0];
+  const savedData = localStorage.getItem(DATA_KEY);
+  const savedDate = localStorage.getItem(DATE_KEY);
+  const today = new Date().toISOString().split('T')[0];
 
-  if (savedData && savedDate && savedDate !== today) {
+  // RESET stored password on load (clears any previously saved password)
+  if (localStorage.getItem(PASSWORD_KEY)) {
+	localStorage.removeItem(PASSWORD_KEY);
+	console.log('Stored log access password has been reset.');
+  }
+
+  if (savedData && savedDate && savedDate !== today) {
 	const parsedData = JSON.parse(savedData);
 	dataEntries = parsedData;
 	currentExportDate = savedDate;
 	alert(`A new day has begun! Please export the logs from ${savedDate} before logging new entries.`);
-  } else if (savedData && savedDate === today) {
+  } else if (savedData && savedDate === today) {
 	const parsedData = JSON.parse(savedData);
 	dataEntries = parsedData;
 	const maxId = dataEntries.reduce((max, entry) => Math.max(max, entry.ID || 0), 0);
 	autoID = maxId + 1;
 	console.log(`Continuing log for ${today}. ${dataEntries.length} entries loaded.`);
 	currentExportDate = today;
-  } else {
+  } else {
 	localStorage.setItem(DATE_KEY, today);
 	currentExportDate = today;
-  }
-  
-  // Initially hide the export container
-  document.getElementById('exportBtnContainer').style.display = 'none';
+  }
+  
+  // Ensure all controls start hidden/disabled
+  document.getElementById('logsControlBtn').style.display = 'none';
+  toggleAccessButtons(false);
+  logAccessGranted = false;
+
+  // Reflect password reset in the UI
+  if (typeof updatePasswordUI === 'function') updatePasswordUI();
 }
 
 initializeTracker();
 
+
+// 🔒 PASSWORD FUNCTIONS 🔒
+
+function updatePasswordUI() {
+    const setChangeBtn = document.getElementById('setChangePasswordBtn');
+    const pwdInput = document.getElementById('logPasswordInput');
+    const isSet = !!localStorage.getItem(PASSWORD_KEY);
+
+    if (setChangeBtn) {
+        setChangeBtn.textContent = isSet ? "Change Password" : "Set Password";
+    }
+    if (pwdInput) {
+        pwdInput.placeholder = logAccessGranted ? "Access Granted" : (isSet ? "Enter Password to Access Logs" : "Set a Password (4+ chars)");
+        pwdInput.disabled = logAccessGranted;
+        pwdInput.type = logAccessGranted ? 'text' : 'password'; // Visually show access is granted
+    }
+}
+
+function checkAndGrantLogAccess() {
+    const storedPassword = localStorage.getItem(PASSWORD_KEY);
+    const passwordInput = document.getElementById('logPasswordInput');
+    const attempt = (passwordInput.value || '').trim();
+
+    // Case 1: Already granted
+    if (logAccessGranted) {
+        return true;
+    }
+
+    // Case 2: No password set, grant access (but user must set one for security)
+    if (!storedPassword) {
+        alert("No password set. Access granted for now, but please set one using the 'Set Password' button for security.");
+        logAccessGranted = true;
+        toggleAccessButtons(true);
+        updatePasswordUI();
+        passwordInput.value = '';
+        return true;
+    }
+
+    // Case 3: Password check
+    if (attempt === storedPassword) {
+        logAccessGranted = true;
+        toggleAccessButtons(true);
+        updatePasswordUI();
+        passwordInput.value = '';
+        alert("Access Granted.");
+        return true;
+    } else {
+        alert("Incorrect Password.");
+        passwordInput.value = '';
+        passwordInput.focus();
+        return false;
+    }
+}
+
+function changePasswordFlow() {
+    const stored = localStorage.getItem(PASSWORD_KEY);
+    const passwordInput = document.getElementById('logPasswordInput');
+
+    // Step 1: Check Current Password (if set)
+    if (stored) {
+        const current = prompt("Enter current password to change:");
+        if (current === null) return; // cancelled
+        if (current !== stored) {
+            alert("Incorrect current password.");
+            return;
+        }
+    }
+
+    // Step 2: Get New Password
+    const newPassword = prompt("Enter new password (4+ characters):");
+    if (newPassword === null) return; // cancelled
+    const trimmedPassword = newPassword.trim();
+
+    if (trimmedPassword.length < 4) {
+        alert("New password must be at least 4 characters long.");
+        return;
+    }
+
+    // Step 3: Save and Reset Access
+    localStorage.setItem(PASSWORD_KEY, trimmedPassword);
+    logAccessGranted = false;
+    toggleAccessButtons(false);
+    if (passwordInput) passwordInput.value = '';
+    alert(stored ? "Password changed successfully." : "Password set successfully.");
+    updatePasswordUI();
+}
+
+// ---------------------------------------------
+
+
 function selectCategory(category) {
   window.currentCategory = category;
-  const exportContainer = document.getElementById('exportBtnContainer');
-  const today = new Date().toISOString().split('T')[0];
+  const logsBtn = document.getElementById('logsControlBtn');
 
-  // Show export/view buttons if data exists OR if the logs are from a previous day.
-  if (dataEntries.length > 0 || currentExportDate !== today) {
-	exportContainer.style.display = 'block';
+  // 🛑 ACCESS CONTROL: Students CANNOT see the Logs button
+  if (category === 'Student') {
+    logsBtn.style.display = 'none';
+    document.getElementById('screen1').style.display = 'none';
+    document.getElementById('screen2').style.display = 'block'; // Go straight to Movement
   } else {
-	exportContainer.style.display = 'none';
-  }
-
-  if (category === 'Staff') {
-	document.getElementById('screen1').style.display = 'none';
-	document.getElementById('screen1-5').style.display = 'block'; // Go to Staff type selection
-  } else {
-	document.getElementById('screen1').style.display = 'none';
-	document.getElementById('screen2').style.display = 'block'; // Go to Movement selection
-  	// The export container logic is handled below in selectStaffType and goBackToStaffOrMain
+    // Staff/Management: Show the Logs button on the Movement screen
+    logsBtn.style.display = 'block';
+    if (category === 'Staff') {
+      document.getElementById('screen1').style.display = 'none';
+      document.getElementById('screen1-5').style.display = 'block'; // Go to Staff type selection
+    } else {
+      document.getElementById('screen1').style.display = 'none';
+      document.getElementById('screen2').style.display = 'block'; // Go to Movement selection
+    }
   }
 }
 
@@ -297,12 +446,30 @@ function selectStaffType(type) {
   window.currentStaffType = type;
   document.getElementById('screen1-5').style.display = 'none';
   document.getElementById('screen2').style.display = 'block';
+}
 
-  // Ensure the export buttons show up on screen 2 if we came from screen 1-5
-  const exportContainer = document.getElementById('exportBtnContainer');
-  const today = new Date().toISOString().split('T')[0];
-  if (dataEntries.length > 0 || currentExportDate !== today) {
-	exportContainer.style.display = 'block';
+function showLogsControlScreen() {
+  // 🛑 ACCESS CONTROL: Ensure non-Staff/Management cannot access (redundant check)
+  if (window.currentCategory === 'Student') {
+    return alert("Access Denied. Only Staff and Management can view logs.");
+  }
+
+  // Hide all other screens
+  document.getElementById('screen1').style.display = 'none';
+  document.getElementById('screen1-5').style.display = 'none';
+  document.getElementById('screen2').style.display = 'none';
+  document.getElementById('screen3').style.display = 'none';
+  document.getElementById('screenLogs').style.display = 'none';
+  
+  // Show the new control screen
+  document.getElementById('screenLogsControl').style.display = 'block';
+
+  // Update the UI state of the password section
+  toggleAccessButtons(logAccessGranted);
+  updatePasswordUI();
+  
+  if (!logAccessGranted) {
+    document.getElementById('logPasswordInput').focus();
   }
 }
 
@@ -315,11 +482,11 @@ function selectMovement(movement) {
 
   const classInput = document.getElementById('classInput');
   if (window.currentCategory === 'Student') {
-	classInput.placeholder = 'Enter Class';
+    classInput.placeholder = 'Enter Class';
   } else if (window.currentCategory === 'Staff') {
-	classInput.placeholder = window.currentStaffType === 'Teaching' ? 'Enter Class' : 'Enter Department';
+    classInput.placeholder = window.currentStaffType === 'Teaching' ? 'Enter Class' : 'Enter Department';
   } else if (window.currentCategory === 'Management') {
-	classInput.placeholder = 'Enter Position';
+    classInput.placeholder = 'Enter Position';
   }
 
   document.getElementById('nameInput').value = '';
@@ -331,23 +498,24 @@ function selectMovement(movement) {
 function goBackToScreen1() {
   document.getElementById('screen1-5').style.display = 'none';
   document.getElementById('screen1').style.display = 'block';
-  // Hide export buttons when going back to main category screen
-  document.getElementById('exportBtnContainer').style.display = 'none';
+  document.getElementById('logsControlBtn').style.display = 'none';
 }
 
 function goBackToStaffOrMain() {
   document.getElementById('screen2').style.display = 'none';
+  document.getElementById('screenLogsControl').style.display = 'none'; // Added to handle back from logs control
+
   if (window.currentCategory === 'Staff') {
-	document.getElementById('screen1-5').style.display = 'block';
+    document.getElementById('screen1-5').style.display = 'block';
   } else {
-	document.getElementById('screen1').style.display = 'block';
-  	// Hide export buttons when going back to main category screen
-  	document.getElementById('exportBtnContainer').style.display = 'none';
+    document.getElementById('screen1').style.display = 'block';
+    document.getElementById('logsControlBtn').style.display = 'none';
   }
 }
 
 function goBackToScreen2() {
   document.getElementById('screen3').style.display = 'none';
+  document.getElementById('screenLogsControl').style.display = 'none'; // Added to handle back from logs control
   document.getElementById('screen2').style.display = 'block';
 }
 
@@ -358,7 +526,7 @@ function logEntry() {
 
   const today = new Date().toISOString().split('T')[0];
   if (currentExportDate !== today) {
-	return alert("Cannot log new entry. Please export the previous day's logs first.");
+    return alert("Cannot log new entry. Please export the previous day's logs first.");
   }
 
   if (!name) return alert('Please enter a name before logging.');
@@ -367,11 +535,11 @@ function logEntry() {
   let finalClassVal = classVal || nameToClassMap[key];
 
   if (!finalClassVal && !nameToClassMap[key]) {
-	return alert('Please enter class, department, or position for this new name.');
+    return alert('Please enter class, department, or position for this new name.');
   }
 
   if (!nameToClassMap[key] && finalClassVal) {
-	nameToClassMap[key] = finalClassVal;
+    nameToClassMap[key] = finalClassVal;
   }
 
   const category = window.currentCategory || 'Student';
@@ -380,18 +548,18 @@ function logEntry() {
 
   let categoryField = 'Department';
   if (category === 'Student' || (category === 'Staff' && staffType === 'Teaching')) {
-	categoryField = 'Class';
+    categoryField = 'Class';
   } else if (category === 'Management') {
-	categoryField = 'Position';
+    categoryField = 'Position';
   }
 
   const entry = {
-	ID: autoID++,
-	Name: name,
-	Category: category,
-	StaffType: staffType,
-	Movement: movement,
-	Time: time || getFormattedDateTime()
+    ID: autoID++,
+    Name: name,
+    Category: category,
+    StaffType: staffType,
+    Movement: movement,
+    Time: time || getFormattedDateTime()
   };
   // attach the appropriate field
   entry[categoryField] = nameToClassMap[key] || finalClassVal || '';
@@ -399,8 +567,10 @@ function logEntry() {
   dataEntries.push(entry);
   saveData();
   
-  // After logging an entry, ensure the export button is visible
-  document.getElementById('exportBtnContainer').style.display = 'block';
+  // After logging an entry, ensure the Logs button is visible, but only if not a Student
+  if (window.currentCategory !== 'Student') {
+    document.getElementById('logsControlBtn').style.display = 'block';
+  }
 
   document.getElementById('nameInput').value = '';
   document.getElementById('classInput').value = '';
@@ -412,39 +582,37 @@ function logEntry() {
 }
 
 /**
- * NEW LOGIC for displaying logs on a separate screen.
- */
+ * Displays logs on a separate screen.
+ */
 function viewLogs() {
+  // This function is only called if logAccessGranted is true, but we keep the student check
+  if (window.currentCategory === 'Student') {
+    return alert("Access Denied. Students are not authorized to view logs.");
+  }
+
+  document.getElementById('screenLogsControl').style.display = 'none';
   const logsContainer = document.getElementById('logsTableContainer');
-  
-  // Hide all other screens
-  document.getElementById('screen1').style.display = 'none';
-  document.getElementById('screen1-5').style.display = 'none';
-  document.getElementById('screen2').style.display = 'none';
-  document.getElementById('screen3').style.display = 'none';
-  
-  // Show the Logs screen
   document.getElementById('screenLogs').style.display = 'block';
 
   if (dataEntries.length === 0) {
-	logsContainer.innerHTML = '<p>No entries logged yet.</p>';
-	return;
+    logsContainer.innerHTML = '<p>No entries logged yet.</p>';
+    return;
   }
 
   let html = '<table>';
   html += '<tr><th>ID</th><th>Name</th><th>Category</th><th>Staff Type</th><th>Class/Dept/Pos</th><th>Movement</th><th>Time</th></tr>';
 
   for (const e of dataEntries) {
-	const info = e.Class || e.Department || e.Position || '';
-	html += `<tr>
-	  <td>${e.ID}</td>
-	  <td>${e.Name}</td>
-	  <td>${e.Category}</td>
-	  <td>${e.StaffType || '-'}</td>
-	  <td>${info}</td>
-	  <td>${e.Movement}</td>
-	  <td>${e.Time}</td>
-	</tr>`;
+    const info = e.Class || e.Department || e.Position || '';
+    html += `<tr>
+      <td>${e.ID}</td>
+      <td>${e.Name}</td>
+      <td>${e.Category}</td>
+      <td>${e.StaffType || '-'}</td>
+      <td>${info}</td>
+      <td>${e.Movement}</td>
+      <td>${e.Time}</td>
+    </tr>`;
   }
 
   html += '</table>';
@@ -452,18 +620,14 @@ function viewLogs() {
 }
 
 /**
- * NEW LOGIC for going back from the logs screen.
- */
+ * Logic for going back from the logs table view to the logs control screen.
+ */
 function goBackFromLogs() {
   document.getElementById('screenLogs').style.display = 'none';
   
-  // Go back to the screen the user was last on, which is either screen 1-5 or screen 2
-  if (window.currentCategory === 'Staff') {
-	document.getElementById('screen1-5').style.display = 'block';
-  } else {
-	// If it's student or management, return to the movement screen (screen 2)
-	document.getElementById('screen2').style.display = 'block';
-  }
+  // Go back to the Logs Control screen
+  document.getElementById('screenLogsControl').style.display = 'block';
+  updatePasswordUI();
 }
 
 function onNameChanged() {
@@ -472,19 +636,19 @@ function onNameChanged() {
   const logButton = document.getElementById('logEntryBtn');
 
   if (name && nameToClassMap[name]) {
-	classInput.value = nameToClassMap[name];
-	classInput.disabled = true;
-	updateCurrentTime();
-	logButton.disabled = false;
+    classInput.value = nameToClassMap[name];
+    classInput.disabled = true;
+    updateCurrentTime();
+    logButton.disabled = false;
   } else if (name) {
-	classInput.disabled = false;
-	updateCurrentTime();
-	logButton.disabled = false;
+    classInput.disabled = false;
+    updateCurrentTime();
+    logButton.disabled = false;
   } else {
-	classInput.value = '';
-	classInput.disabled = false;
-	document.getElementById('timeOutput').textContent = '';
-	logButton.disabled = true;
+    classInput.value = '';
+    classInput.disabled = false;
+    document.getElementById('timeOutput').textContent = '';
+    logButton.disabled = true;
   }
 }
 
@@ -493,12 +657,17 @@ function updateCurrentTime() {
 }
 
 function exportToExcel() {
+  // This function is only called if logAccessGranted is true, but we keep the student check
+  if (window.currentCategory === 'Student') {
+    return alert("Access Denied. Students are not authorized to export data.");
+  }
+
   if (dataEntries.length === 0) {
-	if (localStorage.getItem(DATA_KEY)) {
-	  clearLogs(true);
-	  return;
-	}
-	return alert('No data to export.');
+    if (localStorage.getItem(DATA_KEY)) {
+      clearLogs(true);
+      return;
+    }
+    return alert('No data to export.');
   }
 
   const studentEntries = dataEntries.filter(e => e.Category === 'Student');
@@ -518,7 +687,7 @@ function exportToExcel() {
   // If exporting old-day data, clear and start fresh
   const today = new Date().toISOString().split('T')[0];
   if (currentExportDate !== today) {
-	clearLogs(true);
+    clearLogs(true);
   }
 }
 
