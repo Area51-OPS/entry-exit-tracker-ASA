@@ -690,6 +690,30 @@ function exportToExcel() {
     clearLogs(true);
   }
 }
+function selectCategory(category) {
+  window.currentCategory = category;
+  const logsBtn = document.getElementById('logsControlBtn');
+
+  // Students and all Staff cannot see the Logs button
+  if (category === 'Student' || category === 'Staff') {
+    logsBtn.style.display = 'none';
+  } else {
+    // Management: Show the Logs button
+    logsBtn.style.display = 'block';
+  }
+
+  if (category === 'Student') {
+    document.getElementById('screen1').style.display = 'none';
+    document.getElementById('screen2').style.display = 'block'; // Go straight to Movement
+  } else if (category === 'Staff') {
+    document.getElementById('screen1').style.display = 'none';
+    document.getElementById('screen1-5').style.display = 'block'; // Staff type selection
+  } else if (category === 'Management') {
+    document.getElementById('screen1').style.display = 'none';
+    document.getElementById('screen2').style.display = 'block'; // Movement selection
+  }
+}
+
 
 /* -------------- END OF JS CODE -------------- */
 </script>
